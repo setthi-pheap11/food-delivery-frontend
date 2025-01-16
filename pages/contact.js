@@ -28,7 +28,7 @@ export default function Contact() {
         parse_mode: 'Markdown',
       });
 
-      alert('Your message has been sent to us on Telegram!');
+      // alert('Your message has been sent to us on Telegram!');
       // Reset the form after submission
       setName('');
       setPhoneNumber('');
