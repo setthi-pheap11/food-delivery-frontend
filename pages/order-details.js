@@ -12,7 +12,7 @@ export default function OrderDetails() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!phoneNumber || !customMessage) {
+    if (!phoneNumber) {
       alert('Please fill in all fields.');
       return;
     }
@@ -39,39 +39,40 @@ export default function OrderDetails() {
     }
   };
 
-  return (
+return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">Confirm Your Order</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-96">
-        <div className="mb-4">
-          <label className="block text-gray-700">Telegram Phone Number</label>
-          <input
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="Enter your Telegram number"
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Custom Message</label>
-          <textarea
-            value={customMessage}
-            onChange={(e) => setCustomMessage(e.target.value)}
-            placeholder="Add any note or request..."
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
-            rows="4"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-        >
-          Confirm Order
-        </button>
-      </form>
+        <h1 className="text-3xl font-bold mb-6">Confirm Your Order</h1>
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-96">
+            <div className="mb-4">
+                <label className="block text-gray-700">
+                    Telegram Phone Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Enter your Telegram number"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                    required
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block text-gray-700">Custom Message</label>
+                <textarea
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder="Add any note or request..."
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                    rows="4"
+                />
+            </div>
+            <button
+                type="submit"
+                className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            >
+                Confirm Order
+            </button>
+        </form>
     </div>
-  );
+);
 }
