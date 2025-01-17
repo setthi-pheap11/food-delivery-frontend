@@ -1,44 +1,71 @@
-import { IncomingForm } from 'formidable';
-import fs from 'fs';
-import path from 'path';
+import { useState } from 'react';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export default function AddItemForm() {
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const uploadDir = path.join(process.cwd(), '/public/uploads');
+    const newItem = {
+      name,
+      price,
+      image: imageUrl,  // Use URL instead of a file
+    };
 
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+    const response = await fetch('/api/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newItem),
+    });
 
-  const form = new IncomingForm({
-    uploadDir,
-    keepExtensions: true,
-    maxFileSize: 5 * 1024 * 1024, // 5MB limit
-  });
-
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      console.error('Error during file upload:', err);
-      return res.status(500).json({ message: 'File upload failed.' });
+    if (response.ok) {
+      alert('Item added successfully!');
+      setName('');
+      setPrice('');
+      setImageUrl('');
+    } else {
+      alert('Failed to add item.');
     }
+  };
 
-    const file = files.file;
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <input
+        type="text"
+        placeholder="Item Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="border p-2 w-full"
+        required
+      />
 
-    if (!file) {
-      return res.status(400).json({ message: 'No file uploaded.' });
-    }
+      <input
+        type="number"
+        placeholder="Price"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        className="border p-2 w-full"
+        required
+      />
 
-    const filePath = `/uploads/${path.basename(file.filepath)}`;
-    res.status(200).json({ imageUrl: filePath });
-  });
+      <input
+        type="url"
+        placeholder="Image URL (optional)"
+        value={imageUrl}
+        onChange={(e) => setImageUrl(e.target.value)}
+        className="border p-2 w-full"
+      />
+
+      <button
+        type="submit"
+        className="bg-green-500 text-white px-4 py-2 rounded"
+      >
+        Add Item
+      </button>
+    </form>
+  );
 }

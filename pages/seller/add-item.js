@@ -9,50 +9,25 @@ export default function AddItem() {
 
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
-  const [imageFile, setImageFile] = useState(null);  // Handle file input
-  const [imageURL, setImageURL] = useState('');     // Store uploaded image URL
+  const [imageURL, setImageURL] = useState('');  // Removed imageFile, only URL
   const [seller, setSeller] = useState(null);
 
   // Load seller data from localStorage
   useEffect(() => {
     const savedSeller = JSON.parse(localStorage.getItem('seller'));
     if (!savedSeller) {
-      // alert('Please log in as a seller first!');
       router.push('/seller/register');
     } else {
       setSeller(savedSeller);
     }
   }, []);
 
-  // Handle image upload to the server
-  const handleImageUpload = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);  // ✅ Ensure the 'file' key is used
-  
-    try {
-      const response = await axios.post('/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-  
-      setImageURL(response.data.imageUrl);  // ✅ Save the uploaded image URL
-      // alert('Image uploaded successfully!');
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      alert('Failed to upload image.');
-    }
-  };
-  
-  
-  
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !price || !imageURL) {
-      // alert('Please fill in all fields and upload an image!');
+    if (!title || !price) {
+      alert('Please fill in the item name and price.');
       return;
     }
 
@@ -60,11 +35,10 @@ export default function AddItem() {
       await axios.post('/api/items/items', {
         title,
         price: parseFloat(price),
-        image: imageURL,  // Use the uploaded image URL
+        image: imageURL || 'https://via.placeholder.com/150',  // Default image if none provided
         sellerId: seller.id,
       });
 
-      // alert('Item added successfully!');
       router.push('/seller/dashboard');
     } catch (error) {
       console.error('Error adding item:', error);
@@ -106,17 +80,14 @@ export default function AddItem() {
             />
           </div>
 
-          {/* Image Upload */}
+          {/* Image URL (Optional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Upload Image</label>
+            <label className="block text-sm font-medium text-gray-700">Image URL (optional)</label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                setImageFile(e.target.files[0]);
-                handleImageUpload(e.target.files[0]);
-              }}
-              required
+              type="url"
+              placeholder="Enter image URL"
+              value={imageURL}
+              onChange={(e) => setImageURL(e.target.value)}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
             {imageURL && (
