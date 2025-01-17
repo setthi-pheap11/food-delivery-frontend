@@ -30,5 +30,29 @@
     "email": "sattyphap0@gmail.com",
     "phoneNumber": "093827303",
     "password": "11111111"
+  },
+  {
+    "id": 1737058348825,
+    "firstName": "Ali",
+    "lastName": "Sa",
+    "email": "sattyphap122@gmail.com",
+    "phoneNumber": "0923432",
+    "password": "setthi2003"
+  },
+  {
+    "id": 1737076969019,
+    "firstName": "pheap",
+    "lastName": "setthi",
+    "email": "sattyphap1232@gmail.com",
+    "phoneNumber": "093827303",
+    "password": "setthi2003"
+  },
+  {
+    "id": 1737078225869,
+    "firstName": "Ali",
+    "lastName": "Sa",
+    "email": "sattyphap12322@gmail.com",
+    "phoneNumber": "0923432",
+    "password": "$2a$10$Y.1mDkr23d/pzy1bk2UOYu5Zap2o8S09T3P555Va2HHw6GE9eZPay"
   }
 ]

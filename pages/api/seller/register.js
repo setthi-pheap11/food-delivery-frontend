@@ -1,43 +1,38 @@
-import fs from 'fs';
-import path from 'path';
+// pages/api/seller/register.js
+import pool from '../../../lib/db';
+import bcrypt from 'bcryptjs';
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { firstName, lastName, email, phoneNumber, password } = req.body;
 
-    const filePath = path.join(process.cwd(), 'data', 'sellers.json');
-
-    // Read existing sellers
-    let sellers = [];
-    if (fs.existsSync(filePath)) {
-      const fileData = fs.readFileSync(filePath);
-      sellers = JSON.parse(fileData);
+    if (!firstName || !lastName || !email || !phoneNumber || !password) {
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // Check if email already exists
-    const existingSeller = sellers.find((seller) => seller.email === email);
-    if (existingSeller) {
-      return res.status(400).json({ message: 'Email already registered' });
+    try {
+      // Check if email already exists
+      const existingSeller = await pool.query('SELECT * FROM sellers WHERE email = $1', [email]);
+      if (existingSeller.rows.length > 0) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Insert seller into DB
+      await pool.query(
+        'INSERT INTO sellers (first_name, last_name, email, phone_number, password) VALUES ($1, $2, $3, $4, $5)',
+        [firstName, lastName, email, phoneNumber, hashedPassword]
+      );
+
+      res.status(201).json({ message: 'Seller registered successfully' });
+    } catch (error) {
+      console.error('Error registering seller:', error);
+      res.status(500).json({ message: 'Registration failed' });
     }
-
-    // Create a new seller
-    const newSeller = {
-      id: Date.now(),
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      password,
-    };
-
-    // Add to sellers array
-    sellers.push(newSeller);
-
-    // Save to sellers.json
-    fs.writeFileSync(filePath, JSON.stringify(sellers, null, 2));
-
-    return res.status(201).json({ message: 'Seller registered successfully' });
   } else {
-    res.status(405).json({ message: 'Method Not Allowed' });
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import FoodCard from '../../components/FoodCard';
 
 export default function SellerDashboard() {
   const [items, setItems] = useState([]);
@@ -15,8 +14,17 @@ export default function SellerDashboard() {
   const fetchItems = async () => {
     try {
       const seller = JSON.parse(localStorage.getItem('seller'));
+      if (!seller) {
+        alert('Please log in as a seller first.');
+        window.location.href = '/seller/login';
+        return;
+      }
+
+      // ✅ Fetch all items
       const response = await axios.get('/api/items/items');
-      const sellerItems = response.data.filter(item => item.sellerId === seller.id);
+      
+      // ✅ Filter items belonging to the logged-in seller
+      const sellerItems = response.data.filter(item => item.seller_id === seller.id);
       setItems(sellerItems);
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -29,9 +37,10 @@ export default function SellerDashboard() {
     if (!confirm('Are you sure you want to delete this item?')) return;
 
     try {
+      // ✅ Delete item by ID
       await axios.delete(`/api/items/${id}`);
       alert('Item deleted successfully!');
-      fetchItems();  // Refresh items after deletion
+      fetchItems();  // Refresh after deletion
     } catch (error) {
       console.error('Error deleting item:', error);
       alert('Failed to delete item.');
@@ -63,7 +72,7 @@ export default function SellerDashboard() {
             <div key={item.id} className="border rounded-lg overflow-hidden shadow-lg p-4">
               <img src={item.image} alt={item.title} className="w-full h-40 object-cover" />
               <h2 className="text-xl font-semibold mt-2">{item.title}</h2>
-              <p className="text-green-600 font-bold">${item.price}</p>
+              <p className="text-green-600 font-bold">${parseFloat(item.price).toFixed(2)}</p>
               <button
                 onClick={() => handleDelete(item.id)}
                 className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 w-full"

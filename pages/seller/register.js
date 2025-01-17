@@ -13,10 +13,13 @@ export default function SellerRegister() {
     email: '',
     phoneNumber: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
+  // Handle form input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -24,16 +27,25 @@ export default function SellerRegister() {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      await axios.post('/api/seller/register', formData);
-    //   alert('Registration successful! Please login.');
+      const response = await axios.post('/api/seller/register', formData);
+      alert('Registration successful! Please login.');
       router.push('/seller/login');
     } catch (error) {
-      alert(error.response?.data?.message || 'Registration failed');
+      setError(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -42,16 +54,28 @@ export default function SellerRegister() {
   return (
     <div>
       <Header />
+      
+      {/* Hero Section */}
       <section className="bg-gradient-to-r from-green-400 to-green-600 py-12">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl font-bold text-white">Become a Seller</h1>
-          <p className="text-white mt-2">Join us to start selling your products!</p>
+          <p className="text-white mt-2">Join us to start selling your products today!</p>
         </div>
       </section>
 
+      {/* Registration Form */}
       <section className="p-6 container mx-auto">
-        <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white shadow-lg p-8 rounded-lg space-y-6">
-          <h2 className="text-2xl font-semibold text-center text-gray-700">Register</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-lg mx-auto bg-white shadow-xl p-8 rounded-lg space-y-6"
+        >
+          <h2 className="text-3xl font-semibold text-center text-gray-700">Register</h2>
+
+          {error && (
+            <div className="bg-red-100 text-red-700 px-4 py-2 rounded-md text-center">
+              {error}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <input
@@ -79,7 +103,7 @@ export default function SellerRegister() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder="Email Address"
             className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500"
             required
           />
@@ -104,6 +128,16 @@ export default function SellerRegister() {
             required
           />
 
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password"
+            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500"
+            required
+          />
+
           <button
             type="submit"
             disabled={loading}
@@ -121,6 +155,7 @@ export default function SellerRegister() {
           </button>
         </form>
       </section>
+
       <Footer />
     </div>
   );

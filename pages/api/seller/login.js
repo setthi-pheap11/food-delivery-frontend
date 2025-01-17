@@ -1,29 +1,33 @@
-import fs from 'fs';
-import path from 'path';
+import pool from '../../../lib/db';
+import bcrypt from 'bcryptjs';
 
-export default function handler(req, res) {
-  if (req.method === 'POST') {
-    const { email, password } = req.body;
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
-    const filePath = path.join(process.cwd(), 'data', 'sellers.json');
+  const { email, password } = req.body;
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(400).json({ message: 'No sellers found' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  try {
+    const seller = await pool.query('SELECT * FROM sellers WHERE email = $1', [email]);
+
+    if (seller.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const sellers = JSON.parse(fs.readFileSync(filePath));
+    const isPasswordValid = await bcrypt.compare(password, seller.rows[0].password);
 
-    // Check if the seller exists
-    const seller = sellers.find(
-      (seller) => seller.email === email && seller.password === password
-    );
-
-    if (!seller) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    res.status(200).json({ message: 'Login successful', seller });
-  } else {
-    res.status(405).json({ message: 'Method Not Allowed' });
+    return res.status(200).json({ message: 'Login successful', seller: seller.rows[0] });
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 }
